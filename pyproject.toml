@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel", "versioneer"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyscenic"
+dynamic = ["version", "readme", "dependencies"]
+requires-python = ">=3.11"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst"]}
+dependencies = {file = ["requirements.txt"]}
