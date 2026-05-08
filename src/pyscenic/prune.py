@@ -18,7 +18,7 @@ from boltons.iterutils import chunked_iter
 from ctxcore.genesig import GeneSignature, Regulon
 from ctxcore.rnkdb import MemoryDecorator, RankingDatabase
 from dask import delayed
-from dask.dataframe import from_delayed
+# from dask.dataframe import from_delayed
 from dask.distributed import Client, LocalCluster
 from multiprocessing_on_dill.connection import Pipe
 from multiprocessing_on_dill.context import Process
@@ -32,6 +32,19 @@ from .transform import (
     modules2regulons,
 )
 from .utils import add_motif_url, load_motif_annotations
+
+try:
+    from dask.dataframe import from_delayed
+except (ImportError, NotImplementedError, TypeError):
+    # dask-expr (new query planning) compatibility
+    try:
+        from dask_expr import from_delayed
+        from dask_expr._collection import new_collection
+    except ImportError:
+        raise ImportError(
+            "Could not import dask.dataframe. Please install dask with dataframe support: "
+            "pip install 'dask[dataframe]'"
+        )
 
 __all__ = ["prune2df", "find_features", "df2regulons"]
 
@@ -338,11 +351,11 @@ def _distributed_calc(
             # https://stackoverflow.com/questions/47776936/why-is-a-computation-much-slower-within-a-dask-distributed-worker
 
             return aggregate_func(
-                (
+                [
                     delayed(transform_func)(db, gs_chunk, delayed_or_future_annotations)
                     for db in delayed_or_future_dbs
                     for gs_chunk in chunked_iter(modules, module_chunksize)
-                )
+                ]
             )
 
         # Compute dask graph ...

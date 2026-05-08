@@ -9,7 +9,7 @@ dask
 distributed
 arboreto>=0.1.6
 boltons
-setuptools
+setuptools==69.5.1
 tqdm
 interlap
 loompy
